@@ -65,7 +65,7 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about', onTab
         <div className="clean-modal-header">
           <div className="clean-header-title">
             <span className="appstick-brand-dot" />
-            <span className="appstick-brand-title">Appstick Ltd.</span>
+            <span className="appstick-brand-title"> Appstick.</span>
             <span className="clean-header-divider">/</span>
             <span className="clean-header-current">
               {activeTab === 'about' && 'About Us'}
@@ -142,7 +142,7 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about', onTab
               <div className="clean-hero-box">
                 <h2>About Appstick.</h2>
                 <p className="clean-hero-text">
-                  Founded in 2020 in Bangladesh, <strong>Appstick Ltd.</strong> is a digital product and software engineering company. We design and build modern mobile applications, web platforms, and interactive digital experiences for users and businesses globally.
+                  Founded in 2020 in Bangladesh, <strong> Appstick.</strong> is a digital product and software engineering company. We design and build modern mobile applications, web platforms, and interactive digital experiences for users and businesses globally.
                 </p>
 
                 {/* 4 Key Metrics */}

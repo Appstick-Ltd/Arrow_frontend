@@ -379,7 +379,7 @@ export default function App() {
         {/* Footer Legal Bar */}
         <footer className="footer-legal-bar">
           <div className="footer-copy-text">
-            © {new Date().getFullYear()} <strong>Appstick Ltd.</strong> • All rights reserved. Crafting next-gen interactive digital experiences.
+            © {new Date().getFullYear()} <strong> Appstick.</strong> • All rights reserved. Crafting next-gen interactive digital experiences.
           </div>
           <div className="footer-legal-buttons">
             <button className="footer-legal-btn" onClick={() => openInfo('about')}>

@@ -24,7 +24,7 @@ export default function DownloadModal({ isOpen, onClose, onTone }) {
         <div className="clean-modal-header">
           <div className="clean-header-title">
             <span className="appstick-brand-dot" />
-            <span className="appstick-brand-title">Appstick Ltd.</span>
+            <span className="appstick-brand-title"> Appstick.</span>
             <span className="clean-header-divider">/</span>
             <span className="clean-header-current">Get ARROWS</span>
           </div>
