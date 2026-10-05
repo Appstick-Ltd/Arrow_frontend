@@ -170,7 +170,7 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about', onTab
               <div className="clean-section">
                 <h3>About the Game: ARROWS</h3>
                 <p>
-                  <strong>ARROWS: Puzzle Escape</strong> is an indie 3D puzzle game created by Appstick. The goal is simple: untangle intertwining paths by rotating arrow tiles until all arrows can exit unobstructed. It is designed to be calm, satisfying, and focused on pure logical thinking without intrusive interruptions.
+                  <strong>Arrows – The Puzzle Escape</strong> is an indie 3D puzzle game created by Appstick. The goal is simple: untangle intertwining paths by rotating arrow tiles until all arrows can exit unobstructed. It is designed to be calm, satisfying, and focused on pure logical thinking without intrusive interruptions.
                 </p>
               </div>
 
@@ -213,7 +213,7 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about', onTab
               <div className="clean-hero-box">
                 <h2>Privacy Policy</h2>
                 <p className="clean-hero-text">
-                  Last updated: October 2026. Appstick Ltd. respects your privacy. This policy explains what information is collected when you play <strong>ARROWS: Puzzle Escape</strong>.
+                  Last updated: October 2026. Appstick Ltd. respects your privacy. This policy explains what information is collected when you play <strong>Arrows – The Puzzle Escape</strong>.
                 </p>
               </div>
 
@@ -269,7 +269,7 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about', onTab
                 </p>
                 <p className="clean-email-highlight">
                   <Mail size={15} />
-                  <a href="mailto:privacy@appstick.com.bd">privacy@appstick.com.bd</a>
+                  <a href="mailto:info@appstick.com.bd">info@appstick.com.bd</a>
                 </p>
               </div>
             </div>
@@ -281,7 +281,7 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about', onTab
               <div className="clean-hero-box">
                 <h2>Terms & Conditions</h2>
                 <p className="clean-hero-text">
-                  Last updated: October 2026. By downloading or playing <strong>ARROWS: Puzzle Escape</strong>, you agree to these straightforward terms.
+                  Last updated: October 2026. By downloading or playing <strong>Arrows – The Puzzle Escape</strong>, you agree to these straightforward terms.
                 </p>
               </div>
 
@@ -309,7 +309,7 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about', onTab
               <div className="clean-section">
                 <h3>4. 100% Free & Ad-Supported (No In-App Purchases)</h3>
                 <p>
-                  ARROWS: Puzzle Escape is 100% free to play. There are <strong>no in-app purchases</strong>, paid unlocks, microtransactions, or subscription fees. The game is supported exclusively by standard in-game advertisements, allowing all puzzle levels and future updates to remain completely free for every player.
+                  Arrows – The Puzzle Escape is 100% free to play. There are <strong>no in-app purchases</strong>, paid unlocks, microtransactions, or subscription fees. The game is supported exclusively by standard in-game advertisements, allowing all puzzle levels and future updates to remain completely free for every player.
                 </p>
               </div>
 

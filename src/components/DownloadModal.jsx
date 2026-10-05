@@ -51,7 +51,7 @@ export default function DownloadModal({ isOpen, onClose, onTone }) {
               <span>➤</span>
             </div>
             <div className="clean-app-info">
-              <h3>ARROWS: Puzzle Escape</h3>
+              <h3>Arrows – The Puzzle Escape</h3>
               <p>Minimalist spatial untangling puzzle game by Appstick</p>
               <div className="clean-tags-row">
                 <span className="clean-tag-pill highlight">100% Free</span>
