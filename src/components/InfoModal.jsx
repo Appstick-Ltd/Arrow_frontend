@@ -242,40 +242,50 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about', onTab
               <div className="clean-section">
                 <h3>1. We Do Not Collect Personal Information</h3>
                 <p>
-                  ARROWS does not require you to create an account, enter your name, or share personal contact information. We do not collect, sell, or share any personally identifiable information (PII).
+                  ARROWS does not require you to create an account, enter your name, or share personal contact information. We do not collect, sell, or store any personally identifiable information (PII).
                 </p>
                 <div className="clean-bullet-box">
                   <ul>
-                    <li>No access to your contacts, phone number, or photos</li>
-                    <li>No GPS or physical location tracking</li>
-                    <li>No invasive advertising or tracking identifiers</li>
+                    <li>No access to your contacts, phone number, or media files</li>
+                    <li>No GPS or precise location tracking</li>
+                    <li>No payment or credit card processing (100% free, zero in-app purchases)</li>
                   </ul>
                 </div>
               </div>
 
               <div className="clean-section">
-                <h3>2. Local Device Storage</h3>
+                <h3>2. In-Game Advertisements</h3>
                 <p>
-                  Your game progress (unlocked levels, star counts) and settings (sound on/off) are saved locally on your device so you can play offline at any time.
+                  To keep ARROWS 100% free for everyone without any in-app purchases, the game displays standard in-game advertisements provided by certified third-party ad networks (such as Google AdMob).
+                </p>
+                <p>
+                  These ad partners may receive standard non-personal technical identifiers (such as Google Advertising ID or IDFA) solely to serve family-safe, contextual ads. We do not sell personal data or perform invasive behavioral profiling.
                 </p>
               </div>
 
               <div className="clean-section">
-                <h3>3. App Store & Platform Services</h3>
+                <h3>3. Local Device Storage</h3>
                 <p>
-                  When you download ARROWS via Google Play or Apple App Store, optional achievements and cloud saves are handled securely by Google Play Games or Apple Game Center according to their own privacy policies.
+                  Your game progress (unlocked levels, stars earned) and audio settings are saved locally on your device so you can play offline smoothly.
                 </p>
               </div>
 
               <div className="clean-section">
-                <h3>4. Safe for All Ages (COPPA)</h3>
+                <h3>4. App Store & Platform Services</h3>
                 <p>
-                  ARROWS contains no violence, sensitive content, or behavioral ad profiling. It is fully suitable and safe for players of all ages, including children.
+                  When you download ARROWS via Google Play or Apple App Store, optional achievements and cloud saves are handled securely by Google Play Games or Apple Game Center according to their respective privacy policies.
                 </p>
               </div>
 
               <div className="clean-section">
-                <h3>5. Contact for Privacy Questions</h3>
+                <h3>5. Safe for All Ages (Family & COPPA Compliant)</h3>
+                <p>
+                  ARROWS contains no violence or sensitive content. All served ads comply with family-friendly standards, making the game safe for players of all ages.
+                </p>
+              </div>
+
+              <div className="clean-section">
+                <h3>6. Contact for Privacy Questions</h3>
                 <p>
                   If you have any questions about this privacy policy, please reach out to us at:
                 </p>
@@ -319,9 +329,9 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about', onTab
               </div>
 
               <div className="clean-section">
-                <h3>4. In-App Purchases</h3>
+                <h3>4. 100% Free & Ad-Supported (No In-App Purchases)</h3>
                 <p>
-                  Any optional cosmetic themes or features are processed securely through the Google Play Store or Apple App Store according to standard platform refund rules.
+                  ARROWS: Puzzle Escape is 100% free to play. There are <strong>no in-app purchases</strong>, paid unlocks, microtransactions, or subscription fees. The game is supported exclusively by standard in-game advertisements, allowing all puzzle levels and future updates to remain completely free for every player.
                 </p>
               </div>
 

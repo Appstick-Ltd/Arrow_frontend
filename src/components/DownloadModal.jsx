@@ -139,7 +139,7 @@ export default function DownloadModal({ isOpen, onClose, onTone }) {
         <div className="cyber-terminal-footer">
           <div className="footer-telemetry-tag">
             <ShieldCheck size={14} className="text-green" />
-            <span>VERIFIED SECURE PACKAGE • OFFLINE PLAY SUPPORTED</span>
+            <span>100% FREE • AD-SUPPORTED • NO IN-APP PURCHASES</span>
           </div>
 
           <button
