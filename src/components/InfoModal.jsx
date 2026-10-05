@@ -140,7 +140,7 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about', onTab
             <div className="clean-tab-content">
               {/* Overview intro */}
               <div className="clean-hero-box">
-                <h2>About Appstick Ltd.</h2>
+                <h2>About Appstick.</h2>
                 <p className="clean-hero-text">
                   Founded in 2020 in Bangladesh, <strong>Appstick Ltd.</strong> is a digital product and software engineering company. We design and build modern mobile applications, web platforms, and interactive digital experiences for users and businesses globally.
                 </p>
@@ -213,7 +213,7 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about', onTab
               <div className="clean-hero-box">
                 <h2>Privacy Policy</h2>
                 <p className="clean-hero-text">
-                  Last updated: October 2026. Appstick Ltd. respects your privacy. This policy explains what information is collected when you play <strong>Arrows – The Puzzle Escape</strong>.
+                  Last updated: October 2026. Appstick. respects your privacy. This policy explains what information is collected when you play <strong>Arrows – The Puzzle Escape</strong>.
                 </p>
               </div>
 
@@ -288,14 +288,14 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about', onTab
               <div className="clean-section">
                 <h3>1. License to Play</h3>
                 <p>
-                  Appstick Ltd. grants you a personal, free, non-exclusive license to install and play ARROWS on your mobile or web devices for personal entertainment.
+                  Appstick. grants you a personal, free, non-exclusive license to install and play ARROWS on your mobile or web devices for personal entertainment.
                 </p>
               </div>
 
               <div className="clean-section">
                 <h3>2. Intellectual Property</h3>
                 <p>
-                  All 3D puzzle designs, arrow animations, artwork, sound effects, logos, and code are the intellectual property of Appstick Ltd. You may not copy, extract, or redistribute game assets for commercial use.
+                  All 3D puzzle designs, arrow animations, artwork, sound effects, logos, and code are the intellectual property of Appstick. You may not copy, extract, or redistribute game assets for commercial use.
                 </p>
               </div>
 
@@ -326,7 +326,7 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about', onTab
         {/* Footer */}
         <div className="clean-modal-footer">
           <span className="clean-footer-copy">
-            © {new Date().getFullYear()} Appstick Ltd. All rights reserved.
+            © {new Date().getFullYear()} Appstick. All rights reserved.
           </span>
           <button
             className="clean-done-button"

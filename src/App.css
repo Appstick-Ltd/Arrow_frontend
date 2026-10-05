@@ -986,6 +986,7 @@ h2 {
   padding: 18px 24px;
   background: #111724;
   border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
 }
 
 .clean-header-title {
@@ -1085,6 +1086,9 @@ h2 {
   padding: 0 24px;
   gap: 6px;
   overflow-x: auto;
+  overflow-y: hidden;
+  flex-shrink: 0;
+  min-height: 48px;
 }
 
 .clean-tab-item {
@@ -1102,6 +1106,8 @@ h2 {
   cursor: pointer;
   transition: color 0.2s ease;
   white-space: nowrap;
+  flex-shrink: 0;
+  line-height: normal;
 }
 
 .clean-tab-item:hover {
@@ -1126,6 +1132,8 @@ h2 {
 
 /* Content Body */
 .clean-modal-body {
+  flex: 1 1 auto;
+  min-height: 0;
   padding: 26px 28px;
   overflow-y: auto;
   color: rgba(255, 255, 255, 0.85);
@@ -1312,6 +1320,7 @@ h2 {
   padding: 14px 24px;
   background: #111724;
   border-top: 1px solid rgba(255, 255, 255, 0.08);
+  flex-shrink: 0;
 }
 
 .clean-footer-copy {
@@ -1353,6 +1362,34 @@ h2 {
   display: flex;
   flex-direction: column;
   gap: 20px;
+  overflow-y: auto;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+@media (max-width: 600px) {
+  .clean-modal-backdrop {
+    padding: 12px;
+  }
+  .clean-modal-card {
+    max-height: 92vh;
+  }
+  .clean-modal-header {
+    padding: 14px 16px;
+  }
+  .clean-tabs-bar {
+    padding: 0 12px;
+  }
+  .clean-tab-item {
+    padding: 12px 14px;
+    font-size: 12px;
+  }
+  .clean-modal-body {
+    padding: 20px 16px;
+  }
+  .clean-modal-footer {
+    padding: 12px 16px;
+  }
 }
 
 .clean-app-hero {

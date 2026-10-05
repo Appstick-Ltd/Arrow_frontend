@@ -8,7 +8,7 @@ import './App.css';
 export const TAB_ROUTES = {
   about: {
     path: '/about-us',
-    title: 'ARROWS — About Appstick Ltd.',
+    title: 'ARROWS — About Appstick.',
     aliases: ['/about-us', '/about', '#about-us', '#about']
   },
   privacy: {
