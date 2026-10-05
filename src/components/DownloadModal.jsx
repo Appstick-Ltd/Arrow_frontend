@@ -66,7 +66,7 @@ export default function DownloadModal({ isOpen, onClose, onTone }) {
           <div className="clean-store-grid">
             {/* Google Play Store */}
             <a
-              href="https://play.google.com/store/apps"
+              href="https://play.google.com/store/apps/details?id=bd.com.appstick.arrows"
               target="_blank"
               rel="noopener noreferrer"
               className="clean-store-card store-playstore"
