@@ -174,28 +174,6 @@ export default function InfoModal({ isOpen, onClose, initialTab = 'about', onTab
                 </p>
               </div>
 
-              {/* Flagship Products */}
-              <div className="clean-section">
-                <h3>Other Products by Appstick</h3>
-                <div className="clean-products-grid">
-                  <div className="clean-product-card">
-                    <h4>ARROWS: Puzzle Escape</h4>
-                    <p>Minimalist spatial untangling logic puzzle game for mobile and web.</p>
-                  </div>
-                  <div className="clean-product-card">
-                    <h4>Car2Go</h4>
-                    <p>Vehicle sharing, rental tracking, and smart reservation platform.</p>
-                  </div>
-                  <div className="clean-product-card">
-                    <h4>Taxstick</h4>
-                    <p>Automated tax calculation, filing, and business financial assistant.</p>
-                  </div>
-                  <div className="clean-product-card">
-                    <h4>Gymstick & Lawstick</h4>
-                    <p>Management software solutions for fitness centers and legal practices.</p>
-                  </div>
-                </div>
-              </div>
 
               {/* Contact Information */}
               <div className="clean-section">

@@ -1258,42 +1258,6 @@ h2 {
   font-weight: 600;
 }
 
-/* Products Grid */
-.clean-products-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-  gap: 12px;
-  margin-top: 12px;
-}
-
-.clean-product-card {
-  background: rgba(255, 255, 255, 0.025);
-  border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 8px;
-  padding: 14px 16px;
-  transition: all 0.2s ease;
-}
-
-.clean-product-card:hover {
-  background: rgba(255, 255, 255, 0.04);
-  border-color: rgba(0, 240, 255, 0.3);
-  transform: translateY(-1px);
-}
-
-.clean-product-card h4 {
-  font-size: 14px;
-  font-weight: 700;
-  color: #ffffff;
-  margin: 0 0 4px 0;
-}
-
-.clean-product-card p {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
-  margin: 0;
-  line-height: 1.5;
-}
-
 /* Contact Row */
 .clean-contact-row {
   display: flex;
@@ -1378,204 +1342,178 @@ h2 {
 
 
 /* ==========================================================================
-   FUTURISTIC DOWNLOAD MODAL (App Store & Google Play Deployment)
+   NEAT & CLEAN DOWNLOAD MODAL (App Store & Google Play)
    ========================================================================== */
-.download-frame-compact {
-  max-width: 560px;
+.clean-download-card {
+  max-width: 520px;
 }
 
-.cyber-game-banner {
+.clean-download-body {
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.clean-app-hero {
   display: flex;
   align-items: center;
-  gap: 18px;
-  padding-bottom: 20px;
-  border-bottom: 1px solid rgba(0, 243, 255, 0.15);
-  margin-bottom: 20px;
+  gap: 16px;
 }
 
-.game-hologram-avatar {
-  position: relative;
-  width: 68px;
-  height: 68px;
-  background: rgba(0, 243, 255, 0.1);
-  border: 1px solid #00f3ff;
-  border-radius: 12px;
+.clean-app-icon {
+  width: 60px;
+  height: 60px;
+  border-radius: 14px;
+  background: linear-gradient(135deg, #131c2e 0%, #0d121c 100%);
+  border: 1px solid rgba(0, 240, 255, 0.3);
+  box-shadow: 0 8px 24px -4px rgba(0, 240, 255, 0.25);
   display: flex;
   align-items: center;
   justify-content: center;
-  box-shadow: 0 0 25px rgba(0, 243, 255, 0.35);
+  font-size: 28px;
+  color: #00f0ff;
   flex-shrink: 0;
 }
 
-.game-arrow-symbol {
-  font-size: 34px;
-  color: #00f3ff;
-  font-weight: 900;
-  text-shadow: 0 0 16px #00f3ff;
-}
-
-.avatar-pulse-ring {
-  position: absolute;
-  inset: -6px;
-  border-radius: 16px;
-  border: 1px solid rgba(0, 243, 255, 0.4);
-  animation: radarPing 2.2s infinite ease-out;
-  pointer-events: none;
-}
-
-.game-details {
-  flex: 1;
-}
-
-.game-title-cyber {
-  font-family: 'Chakra Petch', sans-serif;
-  font-size: 20px;
-  font-weight: 800;
-  color: #ffffff;
-  margin: 4px 0 2px 0;
-  letter-spacing: 0.05em;
-  text-shadow: 0 0 15px rgba(0, 243, 255, 0.4);
-}
-
-.game-subtitle-cyber {
-  font-size: 12px;
-  color: rgba(255, 255, 255, 0.6);
-  margin: 0 0 8px 0;
-}
-
-.rating-telemetry-row {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.stars-cluster {
-  display: flex;
-  align-items: center;
-  gap: 2px;
-}
-
-.star-cyber-filled {
-  color: #ffd000;
-  fill: #ffd000;
-  filter: drop-shadow(0 0 4px #ffd000);
-}
-
-.rating-num {
-  font-family: 'Chakra Petch', sans-serif;
-  font-size: 13px;
+.clean-app-info h3 {
+  margin: 0;
+  font-size: 18px;
   font-weight: 700;
   color: #ffffff;
+  letter-spacing: -0.01em;
 }
 
-.review-meta {
-  font-family: var(--font-mono, monospace);
-  font-size: 10px;
-  color: rgba(255, 255, 255, 0.45);
+.clean-app-info p {
+  margin: 3px 0 0 0;
+  font-size: 12.5px;
+  color: rgba(255, 255, 255, 0.65);
 }
 
-/* Store Platforms Matrix */
-.store-platforms-matrix {
+.clean-tags-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.clean-tag-pill {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.75);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.clean-tag-pill.highlight {
+  background: rgba(0, 240, 255, 0.1);
+  color: #00f0ff;
+  border-color: rgba(0, 240, 255, 0.25);
+}
+
+.clean-store-grid {
   display: flex;
   flex-direction: column;
   gap: 12px;
 }
 
-.cyber-store-card {
+.clean-store-card {
   display: flex;
   align-items: center;
-  padding: 16px 20px;
-  border-radius: 8px;
+  padding: 14px 18px;
+  background: rgba(255, 255, 255, 0.035);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 12px;
   text-decoration: none;
-  background: rgba(5, 9, 16, 0.85);
-  border: 1px solid rgba(255, 255, 255, 0.12);
   color: #ffffff;
-  transition: all 0.22s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  pointer-events: auto;
+  cursor: pointer;
   position: relative;
   overflow: hidden;
 }
 
-.cyber-store-card::before {
+.clean-store-card::before {
   content: '';
   position: absolute;
   top: 0;
   left: 0;
   width: 3px;
   height: 100%;
-  background: #ffffff;
-  opacity: 0.2;
+  background: rgba(255, 255, 255, 0.2);
   transition: all 0.2s ease;
 }
 
-.cyber-store-card:hover {
+.clean-store-card:hover {
+  background: rgba(255, 255, 255, 0.07);
   transform: translateY(-2px);
-  background: rgba(10, 16, 28, 0.95);
+  box-shadow: 0 10px 24px -6px rgba(0, 0, 0, 0.6);
 }
 
-.store-playstore:hover {
-  border-color: #10b981;
-  box-shadow: 0 0 25px rgba(16, 185, 129, 0.25);
+.clean-store-card.store-playstore:hover {
+  border-color: rgba(16, 185, 129, 0.5);
+  box-shadow: 0 8px 24px -4px rgba(16, 185, 129, 0.2);
 }
 
-.store-playstore:hover::before {
+.clean-store-card.store-playstore:hover::before {
   background: #10b981;
-  opacity: 1;
-  box-shadow: 0 0 10px #10b981;
 }
 
-.store-appstore:hover {
-  border-color: #00f3ff;
-  box-shadow: 0 0 25px rgba(0, 243, 255, 0.25);
+.clean-store-card.store-appstore:hover {
+  border-color: rgba(0, 240, 255, 0.5);
+  box-shadow: 0 8px 24px -4px rgba(0, 240, 255, 0.2);
 }
 
-.store-appstore:hover::before {
-  background: #00f3ff;
-  opacity: 1;
-  box-shadow: 0 0 10px #00f3ff;
+.clean-store-card.store-appstore:hover::before {
+  background: #00f0ff;
 }
 
-.store-logo-icon {
-  margin-right: 18px;
+.clean-store-logo {
+  margin-right: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
+  width: 32px;
+  height: 32px;
+  flex-shrink: 0;
   color: #ffffff;
 }
 
-.store-text-group {
+.clean-store-texts {
+  flex: 1;
   display: flex;
   flex-direction: column;
-  flex: 1;
 }
 
-.store-action-tag {
-  font-family: var(--font-mono, monospace);
-  font-size: 9px;
-  letter-spacing: 0.12em;
-  color: rgba(255, 255, 255, 0.5);
+.clean-store-action {
+  font-size: 9.5px;
   text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: rgba(255, 255, 255, 0.5);
+  font-weight: 600;
 }
 
-.store-brand-name {
-  font-family: 'Chakra Petch', sans-serif;
-  font-size: 19px;
-  font-weight: 800;
+.clean-store-name {
+  font-size: 16px;
+  font-weight: 700;
   color: #ffffff;
-  letter-spacing: 0.04em;
+  margin-top: 1px;
 }
 
-.store-ver-meta {
+.clean-store-meta {
   font-size: 11px;
   color: rgba(255, 255, 255, 0.45);
   margin-top: 2px;
 }
 
-.store-redirect-arrow {
+.clean-store-arrow {
   color: rgba(255, 255, 255, 0.4);
-  transition: all 0.2s ease;
+  transition: transform 0.2s ease, color 0.2s ease;
 }
 
-.cyber-store-card:hover .store-redirect-arrow {
-  color: #ffffff;
-  transform: translate(3px, -3px);
+.clean-store-card:hover .clean-store-arrow {
+  color: #00f0ff;
+  transform: translateX(3px);
 }
