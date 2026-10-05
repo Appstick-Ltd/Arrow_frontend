@@ -1,9 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import * as THREE from 'three';
 import gsap from 'gsap';
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer.js';
-import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
-import { UnrealBloomPass } from 'three/examples/jsm/postprocessing/UnrealBloomPass.js';
 import { createFloatingBoardModel, createHeartMesh } from '../three/floatingBoardModel';
 import { spawnColorfulSnakeMaze } from '../three/colorfulMazeBuilder';
 import { COLORFUL_MAZE_ARROWS } from '../three/colorfulMazeData';
@@ -17,13 +14,14 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
 
     let animId;
     let autoTimer = null;
+    let initialStartTimer = null;
     const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
-    // 1. Scene & Atmosphere
+    // 1. Scene & Clean Atmosphere (Zero blinding bloom / Zero flash)
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x02080b, 0.026);
+    scene.fog = new THREE.FogExp2(0x030a12, 0.022);
 
-    const camera = new THREE.PerspectiveCamera(44, window.innerWidth / window.innerHeight, 0.1, 180);
+    const camera = new THREE.PerspectiveCamera(42, window.innerWidth / window.innerHeight, 0.1, 180);
     camera.position.set(0, 0, 20);
 
     const renderer = new THREE.WebGLRenderer({
@@ -36,51 +34,26 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
     renderer.shadowMap.enabled = window.innerWidth > 800;
     renderer.shadowMap.type = THREE.PCFSoftShadowMap;
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
-    renderer.toneMappingExposure = 1.05;
-    renderer.setClearColor(0x020608, 1);
+    renderer.toneMappingExposure = 1.0;
+    renderer.setClearColor(0x02070c, 1);
 
-    // 2. Post-processing Bloom (Tasteful, eliminates blinding hotspots)
-    let composer = null;
-    if (window.innerWidth > 800) {
-      try {
-        composer = new EffectComposer(renderer);
-        composer.addPass(new RenderPass(scene, camera));
-        composer.addPass(
-          new UnrealBloomPass(
-            new THREE.Vector2(window.innerWidth, window.innerHeight),
-            0.32,  // Soft glowing strength
-            0.55,  // Bloom radius
-            0.72   // High threshold: only vibrant neon shines, zero blinding white flares
-          )
-        );
-      } catch (e) {
-        composer = null;
-      }
-    }
+    // 2. Pure Balanced Studio Lighting (NO point lights, NO flash, NO harsh glare)
+    scene.add(new THREE.AmbientLight(0xdcf3ff, 0.85));
 
-    // 3. Cinematic Lights & Dedicated Hero Board Studio Lighting
-    scene.add(new THREE.HemisphereLight(0xc4f5ff, 0x05131d, 0.85));
-
-    const key = new THREE.DirectionalLight(0xe7fcff, 2.4);
+    const key = new THREE.DirectionalLight(0xffffff, 1.8);
     key.position.set(-6, 10, 12);
     key.castShadow = true;
     scene.add(key);
 
-    // Dedicated Soft Studio Directional Light for 3D Board
-    const boardKey = new THREE.DirectionalLight(0xf0fbff, 2.6);
-    boardKey.position.set(6, 4, 11);
+    const boardKey = new THREE.DirectionalLight(0xe8f6ff, 1.4);
+    boardKey.position.set(5, 5, 10);
     scene.add(boardKey);
 
-    // Subtle Cyan Rim Fill
-    const boardCyanAccent = new THREE.DirectionalLight(0x38bdf8, 1.4);
-    boardCyanAccent.position.set(3.5, -3.5, 7.0);
-    scene.add(boardCyanAccent);
+    const fillLight = new THREE.DirectionalLight(0x38bdf8, 0.6);
+    fillLight.position.set(-4, -4, 6);
+    scene.add(fillLight);
 
-    const rim = new THREE.PointLight(0x31eaff, 3.2, 30);
-    rim.position.set(8, -2, 3);
-    scene.add(rim);
-
-    // 4. Arrow Geometry Generator for mini-boards
+    // 3. Arrow Geometry Generator for mini-boards
     function createArrowGeometry(scale = 1, depth = 0.34) {
       const s = scale;
       const d = depth;
@@ -108,25 +81,21 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
 
     const arrowGeo = createArrowGeometry(0.52, 0.34);
 
-    const tileMaterial = new THREE.MeshPhysicalMaterial({
+    const tileMaterial = new THREE.MeshStandardMaterial({
       color: 0x1f3c55,
-      metalness: 0.85,
-      roughness: 0.16,
-      clearcoat: 1.0,
-      emissive: 0x092b3f,
-      emissiveIntensity: 0.75,
+      metalness: 0.8,
+      roughness: 0.3,
     });
 
-    const litMaterial = new THREE.MeshPhysicalMaterial({
-      color: 0xf0feff,
-      metalness: 0.25,
-      roughness: 0.06,
-      clearcoat: 1.0,
-      emissive: 0x00f3ff,
-      emissiveIntensity: 2.2,
+    const litMaterial = new THREE.MeshStandardMaterial({
+      color: 0x00f3ff,
+      emissive: 0x0088aa,
+      emissiveIntensity: 0.5,
+      metalness: 0.3,
+      roughness: 0.2,
     });
 
-    // 5. Clean Floating 3D Puzzle Board (No phone frame, no phone screen!)
+    // 4. Large, Prominent Floating 3D Puzzle Board (No phone frame, No flash)
     const { boardGroup, boardZ } = createFloatingBoardModel();
     const board = boardGroup;
     let arrowGroups = [];
@@ -135,42 +104,42 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
     let escapedCount = 0;
     const totalArrows = COLORFUL_MAZE_ARROWS.length;
 
-    // 3 Glossy 3D Game Hearts floating right above the puzzle board (❤️❤️❤️)
-    const heartSpacing = 0.52;
+    // 3 Large, Glossy 3D Game Hearts floating above the board (❤️❤️❤️)
+    const heartSpacing = 0.7;
     for (let h = 0; h < 3; h++) {
       const heart = createHeartMesh();
-      heart.scale.setScalar(0.52);
-      heart.position.set((h - 1) * heartSpacing, 2.75, boardZ + 0.06);
+      heart.scale.setScalar(0.72);
+      heart.position.set((h - 1) * heartSpacing, 3.75, boardZ + 0.06);
       board.add(heart);
       hearts.push(heart);
     }
 
-    // Spawn the Authentic Colorful Snake Maze on the floating board
+    // Spawn the Large, Colorful Snake Maze on the board
     function spawnMaze() {
-      // Remove any remaining arrow meshes
+      // Clean up previous arrows
       board.children = board.children.filter((c) => !c.name.startsWith('Arrow_'));
-      arrowGroups = spawnColorfulSnakeMaze(board, 1.08, { x: 0, y: -0.1 }, boardZ + 0.04);
+      arrowGroups = spawnColorfulSnakeMaze(board, 1.6, { x: 0, y: -0.1 }, boardZ + 0.04);
       escapedCount = 0;
       if (onTileChange) onTileChange(0, totalArrows);
     }
     spawnMaze();
 
     const mobileBoard = window.innerWidth < 800;
-    board.position.set(mobileBoard ? 0.35 : 5.15, mobileBoard ? -2.2 : -0.1, 0);
-    board.rotation.set(-0.14, 0.22, -0.06);
-    board.scale.setScalar(mobileBoard ? 0.72 : 1.0);
+    board.position.set(mobileBoard ? 0.0 : 4.4, mobileBoard ? -2.2 : -0.05, 0);
+    board.rotation.set(-0.12, 0.18, -0.04);
+    board.scale.setScalar(mobileBoard ? 0.88 : 1.25);
     scene.add(board);
 
-    // Orbit torus ring framing the floating board
+    // Subtle framing orbit ring
     const orbit = new THREE.Mesh(
-      new THREE.TorusGeometry(4.9, 0.012, 6, 128),
-      new THREE.MeshBasicMaterial({ color: 0x41efff, transparent: true, opacity: 0.16 })
+      new THREE.TorusGeometry(5.4, 0.01, 6, 128),
+      new THREE.MeshBasicMaterial({ color: 0x00f3ff, transparent: true, opacity: 0.12 })
     );
     orbit.position.copy(board.position);
     orbit.rotation.x = 1.1;
     scene.add(orbit);
 
-    // 6. Section 2: Mini boards in depth (z = -21)
+    // 5. Section 2: Mini boards in depth (z = -21)
     function createMiniBoard(x, y, z, scale, complexity) {
       const g = new THREE.Group();
       for (let j = 0; j < complexity; j++) {
@@ -194,7 +163,7 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
       createMiniBoard(5, -2.1, -21, 1.5, 16),
     ];
 
-    // 7. Section 3: Sequence group (z = -40)
+    // 6. Section 3: Sequence group (z = -40)
     const sequenceGroup = new THREE.Group();
     for (let q = 0; q < 15; q++) {
       const qm = new THREE.Mesh(arrowGeo, q % 4 === 0 ? litMaterial : tileMaterial);
@@ -206,42 +175,8 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
     sequenceGroup.rotation.set(0.05, -0.32, -0.05);
     scene.add(sequenceGroup);
 
-    // 8. Section 4: Clean, minimal atmospheric background (Zero giant arrow / zero blinding bloom)
-
-    // 9. Ambient Background Instanced Arrow Shards (Placed deep to keep Hero Text 100% clean)
-    const bgCount = window.innerWidth < 800 ? 18 : 34;
-    const bgGeo = createArrowGeometry(0.11, 0.12);
-    const bgMat = new THREE.MeshStandardMaterial({
-      color: 0x112329,
-      metalness: 0.8,
-      roughness: 0.38,
-      emissive: 0x04191d,
-      emissiveIntensity: 0.25,
-    });
-    const inst = new THREE.InstancedMesh(bgGeo, bgMat, bgCount);
-    const dummy = new THREE.Object3D();
-    const bgSeeds = [];
-    for (let b = 0; b < bgCount; b++) {
-      const side = b % 2 === 0 ? 1 : -1;
-      const sd = {
-        x: side * (10 + Math.random() * 18),
-        y: (Math.random() - 0.5) * 22,
-        z: -Math.random() * 55 - 15,
-        r: Math.random() * 6,
-        s: 0.4 + Math.random() * 1.1,
-        sp: 0.05 + Math.random() * 0.1,
-      };
-      bgSeeds.push(sd);
-      dummy.position.set(sd.x, sd.y, sd.z);
-      dummy.rotation.set(sd.r * 0.4, sd.r, sd.r * 0.2);
-      dummy.scale.setScalar(sd.s);
-      dummy.updateMatrix();
-      inst.setMatrixAt(b, dummy.matrix);
-    }
-    scene.add(inst);
-
-    // Dust particles
-    const particleCount = window.innerWidth < 800 ? 90 : 180;
+    // 7. Ambient Dust Particles (Subtle, non-distracting)
+    const particleCount = window.innerWidth < 800 ? 60 : 120;
     const pGeo = new THREE.BufferGeometry();
     const pPos = new Float32Array(particleCount * 3);
     for (let p = 0; p < particleCount; p++) {
@@ -254,31 +189,15 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
       pGeo,
       new THREE.PointsMaterial({
         color: 0x8df9ff,
-        size: 0.028,
+        size: 0.024,
         transparent: true,
-        opacity: 0.45,
-        blending: THREE.AdditiveBlending,
+        opacity: 0.35,
         depthWrite: false,
       })
     );
     scene.add(points);
 
-    // Volumetric beam
-    const beam = new THREE.Mesh(
-      new THREE.CylinderGeometry(0.25, 3, 30, 20, 1, true),
-      new THREE.MeshBasicMaterial({
-        color: 0x43efff,
-        transparent: true,
-        opacity: 0.016,
-        side: THREE.DoubleSide,
-        depthWrite: false,
-      })
-    );
-    beam.position.set(7, 8, -8);
-    beam.rotation.z = 0.58;
-    scene.add(beam);
-
-    // 10. Raycasting & Interaction Logic
+    // 8. Raycasting & Interaction Logic
     const raycaster = new THREE.Raycaster();
     const pointer = new THREE.Vector2(9, 9);
     let hoveredGroup = null;
@@ -300,8 +219,8 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
         const dx = e.clientX - lastX;
         const dy = e.clientY - lastY;
         if (Math.abs(dx) + Math.abs(dy) > 2) moved = true;
-        userRot.y += dx * 0.004;
-        userRot.x += dy * 0.003;
+        userRot.y += dx * 0.003;
+        userRot.x += dy * 0.0025;
         lastX = e.clientX;
         lastY = e.clientY;
       }
@@ -315,35 +234,8 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
       ndc(e);
       try {
         canvas.setPointerCapture(e.pointerId);
-      } catch (x) {}
+      } catch (x) { }
     };
-
-    function burstAt(pos) {
-      const pulse = new THREE.Mesh(
-        new THREE.RingGeometry(0.12, 0.28, 32),
-        new THREE.MeshBasicMaterial({
-          color: 0x00f3ff,
-          transparent: true,
-          opacity: 0.95,
-          side: THREE.DoubleSide,
-          depthTest: false,
-        })
-      );
-      pulse.position.copy(pos);
-      pulse.position.z += 0.35;
-      board.add(pulse);
-
-      gsap.to(pulse.scale, { x: 7, y: 7, z: 7, duration: 0.52, ease: 'power2.out' });
-      gsap.to(pulse.material, {
-        opacity: 0,
-        duration: 0.52,
-        onComplete: () => {
-          board.remove(pulse);
-          pulse.geometry.dispose();
-          pulse.material.dispose();
-        },
-      });
-    }
 
     // "saper moto jabe" - True snake path-following slither escape!
     function activateArrow(group) {
@@ -356,11 +248,7 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
         escapedCount++;
         if (onTone) onTone(480 + escapedCount * 24, 0.2, 0.05);
 
-        // Sound / spark burst at leading tip
-        const tipPos = new THREE.Vector3(group.userData.tipPoint.x, group.userData.tipPoint.y, boardZ + 0.1);
-        burstAt(tipPos);
-
-        // TRUE SNAKE SLITHER: Body slithers along its exact polyline path around every corner!
+        // TRUE SNAKE SLITHER: Body and tail follow each corner around the winding path
         group.userData.slitherOut(board, () => {
           // Unblock all other arrows waiting for this snake to leave
           arrowGroups.forEach((other) => {
@@ -369,16 +257,12 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
                 (bId) => bId !== group.userData.id
               );
               if (other.userData.blockedBy.length === 0) {
-                // Glow pulse to highlight this snake is now free!
-                other.userData.segments.forEach((seg) => {
-                  if (seg.material && seg.material.emissiveIntensity !== undefined) {
-                    gsap.fromTo(
-                      seg.material,
-                      { emissiveIntensity: 2.8 },
-                      { emissiveIntensity: 1.5, duration: 0.45 }
-                    );
-                  }
-                });
+                // Subtle pulse to indicate it is now free
+                gsap.fromTo(
+                  other.scale,
+                  { x: 1, y: 1, z: 1 },
+                  { x: 1.05, y: 1.05, z: 1.05, duration: 0.2, yoyo: true, repeat: 1 }
+                );
               }
             }
           });
@@ -396,8 +280,8 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
           const activeHeart = hearts[Math.min(hearts.length - 1, Math.max(0, lives - 1))];
           gsap.fromTo(
             activeHeart.scale,
-            { x: 0.7, y: 0.7, z: 0.7 },
-            { x: 0.52, y: 0.52, z: 0.52, duration: 0.4, ease: 'elastic.out(1, .3)' }
+            { x: 0.9, y: 0.9, z: 0.9 },
+            { x: 0.72, y: 0.72, z: 0.72, duration: 0.4, ease: 'elastic.out(1, .3)' }
           );
         }
       }
@@ -441,35 +325,37 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
       }
       try {
         canvas.releasePointerCapture(e.pointerId);
-      } catch (x) {}
+      } catch (x) { }
     });
 
     // CONTINUOUS AUTO-ANIMATION:
-    // Snakes automatically slither out around corners one by one ("saper moto jabe")
+    // Starts after a 2-second initial pause so the user can appreciate the full colorful puzzle first!
     let isAutoLooping = true;
-    autoTimer = setInterval(() => {
-      if (!isAutoLooping || scrollRef.current > 0.16) return;
+    initialStartTimer = setTimeout(() => {
+      autoTimer = setInterval(() => {
+        if (!isAutoLooping || scrollRef.current > 0.16) return;
 
-      const freeArrows = arrowGroups.filter(
-        (g) => !g.userData.isEscaped && g.userData.blockedBy.length === 0
-      );
+        const freeArrows = arrowGroups.filter(
+          (g) => !g.userData.isEscaped && g.userData.blockedBy.length === 0
+        );
 
-      if (freeArrows.length > 0) {
-        const targetArrow = freeArrows[0];
-        activateArrow(targetArrow);
-      } else {
-        const remaining = arrowGroups.filter((g) => !g.userData.isEscaped);
-        if (remaining.length === 0) {
-          isAutoLooping = false;
-          setTimeout(() => {
-            resetPuzzle();
-            isAutoLooping = true;
-          }, 1500);
+        if (freeArrows.length > 0) {
+          const targetArrow = freeArrows[0];
+          activateArrow(targetArrow);
+        } else {
+          const remaining = arrowGroups.filter((g) => !g.userData.isEscaped);
+          if (remaining.length === 0) {
+            isAutoLooping = false;
+            setTimeout(() => {
+              resetPuzzle();
+              isAutoLooping = true;
+            }, 1600);
+          }
         }
-      }
-    }, 850);
+      }, 1300); // Relaxed, enjoyable pace: 1.3s per snake slither
+    }, 2000);
 
-    // 11. Scroll and Mouse Coordination
+    // 9. Scroll and Mouse Coordination
     const mouse = { x: 0, y: 0 };
     const onWindowMouseMove = (e) => {
       mouse.x = e.clientX / window.innerWidth - 0.5;
@@ -485,7 +371,7 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
     };
     window.addEventListener('scroll', onWindowScroll, { passive: true });
 
-    // 12. Animation Loop
+    // 10. Animation Loop
     const clock = new THREE.Clock();
     const cursor = document.querySelector('.cursor');
 
@@ -496,16 +382,16 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
       scrollRef.current += (targetScroll - scrollRef.current) * 0.05;
       const scroll = scrollRef.current;
       const hero = Math.max(0, 1 - scroll * 5.5);
-      const baseX = window.innerWidth < 800 ? 0.35 : 5.15;
-      const baseY = window.innerWidth < 800 ? -2.2 : -0.1;
+      const baseX = window.innerWidth < 800 ? 0.0 : 4.4;
+      const baseY = window.innerWidth < 800 ? -2.2 : -0.05;
 
       // Clean Floating 3D Board motion
-      board.position.x += (baseX - scroll * 3.2 + mouse.x * 0.45 * hero - board.position.x) * 0.045;
-      board.position.y += (baseY + Math.sin(t * 0.58) * 0.08 - mouse.y * 0.32 * hero - board.position.y) * 0.045;
+      board.position.x += (baseX - scroll * 3.2 + mouse.x * 0.4 * hero - board.position.x) * 0.045;
+      board.position.y += (baseY + Math.sin(t * 0.58) * 0.08 - mouse.y * 0.28 * hero - board.position.y) * 0.045;
       board.position.z = -scroll * 23;
-      board.rotation.y += (0.22 + userRot.y + mouse.x * 0.14 * hero - board.rotation.y) * 0.025;
-      board.rotation.x += (-0.14 + userRot.x + mouse.y * 0.10 * hero - board.rotation.x) * 0.025;
-      board.rotation.z = -0.06 + Math.sin(t * 0.32) * 0.015;
+      board.rotation.y += (0.18 + userRot.y + mouse.x * 0.12 * hero - board.rotation.y) * 0.025;
+      board.rotation.x += (-0.12 + userRot.x + mouse.y * 0.08 * hero - board.rotation.x) * 0.025;
+      board.rotation.z = -0.04 + Math.sin(t * 0.32) * 0.012;
       userRot.x *= 0.98;
       userRot.y *= 0.98;
 
@@ -514,7 +400,7 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
 
       // Pulse floating hearts gently
       hearts.forEach((h, idx) => {
-        h.position.y = 2.75 + Math.sin(t * 2.2 + idx * 0.8) * 0.04;
+        h.position.y = 3.75 + Math.sin(t * 2.2 + idx * 0.8) * 0.04;
       });
 
       // Camera motion
@@ -523,9 +409,6 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
       camera.position.x += (mouse.x * 0.32 - camera.position.x) * 0.025;
       camera.position.y += (-mouse.y * 0.24 - camera.position.y) * 0.025;
       camera.lookAt(0, 0, camera.position.z - 18);
-
-      rim.position.z = camera.position.z - 8;
-      rim.position.x = 7 + mouse.x * 3;
 
       // Hover detection on arrow groups
       if (scroll < 0.16) {
@@ -540,8 +423,18 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
           }
         });
 
-        const hit = raycaster.intersectObjects(allSegments, false)[0];
-        const nextGroup = hit && hit.object.userData.parentGroup ? hit.object.userData.parentGroup : null;
+        const hit = raycaster.intersectObjects(allSegments, true)[0];
+        let nextGroup = null;
+        if (hit) {
+          let curr = hit.object;
+          while (curr && curr !== board) {
+            if (curr.userData && curr.userData.slitherOut) {
+              nextGroup = curr;
+              break;
+            }
+            curr = curr.parent;
+          }
+        }
 
         if (nextGroup !== hoveredGroup) {
           if (hoveredGroup && !hoveredGroup.userData.isEscaped) {
@@ -551,30 +444,16 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
           hoveredGroup = nextGroup;
           if (hoveredGroup && !hoveredGroup.userData.isEscaped) {
             hoveredGroup.position.z = 0.08;
-            hoveredGroup.scale.set(1.05, 1.05, 1.05);
+            hoveredGroup.scale.set(1.04, 1.04, 1.04);
           }
           if (cursor) cursor.classList.toggle('active', !!hoveredGroup);
         }
       }
 
-      // Background drifting shards
-      for (let i = 0; i < bgCount; i++) {
-        const s = bgSeeds[i];
-        dummy.position.set(s.x + Math.sin(t * s.sp + i) * 0.3, s.y + Math.cos(t * s.sp + i) * 0.25, s.z);
-        dummy.rotation.set(s.r * 0.4 + t * s.sp * 0.25, s.r + t * s.sp * 0.5, s.r * 0.2);
-        dummy.scale.setScalar(s.s);
-        dummy.updateMatrix();
-        inst.setMatrixAt(i, dummy.matrix);
-      }
-      inst.instanceMatrix.needsUpdate = true;
-      points.rotation.z = t * 0.003;
-      beam.material.opacity = 0.012 + 0.006 * Math.sin(t * 0.6);
+      points.rotation.z = t * 0.002;
 
-      if (composer) {
-        composer.render();
-      } else {
-        renderer.render(scene, camera);
-      }
+      // Clean Standard Render (Zero Bloom Flash / 100% Crisp Visual Clarity)
+      renderer.render(scene, camera);
     };
 
     animate();
@@ -584,19 +463,18 @@ export default function Canvas3D({ onTileChange, soundEnabled, onTone }) {
       camera.updateProjectionMatrix();
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, window.innerWidth < 800 ? 1.25 : 1.75));
-      if (composer) composer.setSize(window.innerWidth, window.innerHeight);
     };
     window.addEventListener('resize', onResize);
 
     return () => {
       cancelAnimationFrame(animId);
+      if (initialStartTimer) clearTimeout(initialStartTimer);
       if (autoTimer) clearInterval(autoTimer);
       canvas.removeEventListener('pointermove', onPointerMove);
       canvas.removeEventListener('pointerdown', onPointerDown);
       window.removeEventListener('pointermove', onWindowMouseMove);
       window.removeEventListener('scroll', onWindowScroll);
       window.removeEventListener('resize', onResize);
-      if (composer) composer.dispose();
       renderer.dispose();
     };
   }, []);

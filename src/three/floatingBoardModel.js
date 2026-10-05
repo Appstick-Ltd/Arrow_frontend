@@ -1,13 +1,13 @@
 import * as THREE from 'three';
 
-// Creates a sleek, ultra-clean floating 3D puzzle board (No phone screen / no phone frame)
+// Creates a prominent, large floating 3D puzzle board (No phone screen, No flash, No glare)
 export function createFloatingBoardModel() {
   const boardGroup = new THREE.Group();
   boardGroup.name = 'Floating_Puzzle_Board';
 
-  const size = 4.6;
-  const depth = 0.22;
-  const cornerRadius = 0.38;
+  const size = 6.8;
+  const depth = 0.28;
+  const cornerRadius = 0.55;
 
   // 1. 2D Rounded Square Base
   function createRoundedSquareShape(s, r) {
@@ -31,19 +31,16 @@ export function createFloatingBoardModel() {
     bevelEnabled: true,
     bevelSegments: 4,
     steps: 1,
-    bevelSize: 0.06,
-    bevelThickness: 0.06,
+    bevelSize: 0.08,
+    bevelThickness: 0.08,
   });
   baseGeom.center();
 
-  // Dark obsidian/titanium physical material matching game aesthetics
-  const baseMat = new THREE.MeshPhysicalMaterial({
-    color: 0x060c18,
-    metalness: 0.9,
-    roughness: 0.24,
-    clearcoat: 0.95,
-    clearcoatRoughness: 0.1,
-    reflectivity: 0.7,
+  // Dark obsidian/navy matte material - NO harsh specular reflections, NO flash
+  const baseMat = new THREE.MeshStandardMaterial({
+    color: 0x071120, // Authentic dark navy from user's screenshot
+    metalness: 0.4,
+    roughness: 0.65, // Matte surface prevents any blinding white flash
   });
 
   const baseMesh = new THREE.Mesh(baseGeom, baseMat);
@@ -51,24 +48,24 @@ export function createFloatingBoardModel() {
   baseMesh.receiveShadow = true;
   boardGroup.add(baseMesh);
 
-  // 2. Beveled Metallic Accent Edge Line
+  // 2. Crisp Cyan Perimeter Edge Border
   const edgeLine = new THREE.LineSegments(
-    new THREE.EdgesGeometry(baseGeom, 32),
+    new THREE.EdgesGeometry(baseGeom, 35),
     new THREE.LineBasicMaterial({
       color: 0x00f3ff,
       transparent: true,
-      opacity: 0.45,
+      opacity: 0.35,
     })
   );
   boardGroup.add(edgeLine);
 
-  // 3. Cybernetic Corner Brackets
+  // 3. Cyber Corner Brackets
   const bracketMat = new THREE.LineBasicMaterial({
     color: 0x00f3ff,
     transparent: true,
-    opacity: 0.75,
+    opacity: 0.65,
   });
-  const bSize = 0.55;
+  const bSize = 0.85;
   const half = size / 2;
   const corners = [
     [-half, half],
@@ -80,26 +77,24 @@ export function createFloatingBoardModel() {
     const dirX = cx > 0 ? -1 : 1;
     const dirY = cy > 0 ? -1 : 1;
     const pts = [
-      new THREE.Vector3(cx, cy + dirY * bSize, depth / 2 + 0.01),
-      new THREE.Vector3(cx, cy, depth / 2 + 0.01),
-      new THREE.Vector3(cx + dirX * bSize, cy, depth / 2 + 0.01),
+      new THREE.Vector3(cx, cy + dirY * bSize, depth / 2 + 0.015),
+      new THREE.Vector3(cx, cy, depth / 2 + 0.015),
+      new THREE.Vector3(cx + dirX * bSize, cy, depth / 2 + 0.015),
     ];
     boardGroup.add(new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), bracketMat));
   });
 
-  // 4. Subtle Inner Grid Surface
-  const gridPlateGeom = new THREE.PlaneGeometry(size - 0.35, size - 0.35);
+  // 4. Inner Dark Grid Plate (Matching user's game screenshot background)
+  const gridPlateGeom = new THREE.PlaneGeometry(size - 0.4, size - 0.4);
   const gridPlateMat = new THREE.MeshBasicMaterial({
-    color: 0x081326,
-    transparent: true,
-    opacity: 0.95,
+    color: 0x081226,
   });
   const gridPlate = new THREE.Mesh(gridPlateGeom, gridPlateMat);
   gridPlate.position.z = depth / 2 + 0.005;
   boardGroup.add(gridPlate);
 
-  // Subtle Cyan Grid Lines on Plate
-  const gridHelper = new THREE.GridHelper(size - 0.35, 8, 0x143454, 0x0b2038);
+  // Subtle maze grid lines
+  const gridHelper = new THREE.GridHelper(size - 0.4, 10, 0x143454, 0x0d2038);
   gridHelper.position.set(0, 0, depth / 2 + 0.01);
   gridHelper.rotation.x = Math.PI / 2;
   boardGroup.add(gridHelper);
@@ -110,7 +105,7 @@ export function createFloatingBoardModel() {
   };
 }
 
-// Upright, Glossy 3D Game Heart (❤️❤️❤️)
+// Large, Upright, Glossy 3D Game Heart (❤️❤️❤️)
 export function createHeartMesh() {
   const heartShape = new THREE.Shape();
   heartShape.moveTo(0, 0.32);
@@ -120,23 +115,20 @@ export function createHeartMesh() {
   heartShape.bezierCurveTo(-0.44, 0.72, 0, 0.55, 0, 0.32);
 
   const geom = new THREE.ExtrudeGeometry(heartShape, {
-    depth: 0.14,
+    depth: 0.18,
     bevelEnabled: true,
     bevelSegments: 4,
     steps: 1,
-    bevelSize: 0.05,
-    bevelThickness: 0.05,
+    bevelSize: 0.06,
+    bevelThickness: 0.06,
   });
   geom.center();
 
-  const mat = new THREE.MeshPhysicalMaterial({
+  const mat = new THREE.MeshStandardMaterial({
     color: 0xff1646,
-    emissive: 0x990022,
-    emissiveIntensity: 1.1,
-    roughness: 0.14,
+    emissive: 0x880022,
+    roughness: 0.25,
     metalness: 0.2,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.06,
   });
 
   const mesh = new THREE.Mesh(geom, mat);

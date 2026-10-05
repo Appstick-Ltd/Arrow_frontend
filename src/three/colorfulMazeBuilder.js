@@ -3,53 +3,48 @@ import gsap from 'gsap';
 import {
   COLORFUL_MAZE_ARROWS,
   COLOR_PALETTE,
-  COLOR_EMISSIVES,
 } from './colorfulMazeData';
 
-// Creates the 3D Arrowhead geometry
-function createArrowHeadGeom(headSize = 0.26) {
+// Creates 3D Arrowhead geometry
+function createArrowHeadGeom(headSize = 0.38) {
   const shape = new THREE.Shape();
   const hs = headSize;
-  // Equilateral / isosceles triangle pointing UP (+Y)
   shape.moveTo(0, hs * 1.05);
   shape.lineTo(hs * 0.72, -hs * 0.45);
   shape.lineTo(-hs * 0.72, -hs * 0.45);
   shape.closePath();
 
   const geom = new THREE.ExtrudeGeometry(shape, {
-    depth: 0.12,
+    depth: 0.16,
     bevelEnabled: true,
     bevelSegments: 3,
     steps: 1,
-    bevelSize: 0.03,
-    bevelThickness: 0.03,
+    bevelSize: 0.04,
+    bevelThickness: 0.04,
   });
   geom.center();
   return geom;
 }
 
-const cachedHeadGeom = createArrowHeadGeom(0.26);
+const cachedHeadGeom = createArrowHeadGeom(0.38);
 
-// Build a single winding snake arrow with path-following slither animation
-export function buildColorfulSnakeArrow(arrowData, scale = 1.0, center = { x: 0, y: 0 }, zPos = 0.04) {
+// Builds an authentic snake arrow with true piecewise sub-polyline slither
+export function buildColorfulSnakeArrow(arrowData, scale = 1.6, center = { x: 0, y: 0 }, zPos = 0.04) {
   const group = new THREE.Group();
   group.name = `Arrow_${arrowData.id}`;
 
   const hexColor = COLOR_PALETTE[arrowData.colorKey] || 0x00e5ff;
-  const hexEmissive = COLOR_EMISSIVES[arrowData.colorKey] || 0x006688;
 
-  // Saturated lacquer material matching game aesthetic
-  const material = new THREE.MeshPhysicalMaterial({
+  // Vibrant saturated material without blinding over-glow
+  const material = new THREE.MeshStandardMaterial({
     color: hexColor,
-    emissive: hexEmissive,
-    emissiveIntensity: 1.5,
-    metalness: 0.2,
-    roughness: 0.12,
-    clearcoat: 1.0,
-    clearcoatRoughness: 0.06,
+    emissive: hexColor,
+    emissiveIntensity: 0.35, // Rich, vibrant, eye-catching glow with ZERO flash
+    roughness: 0.25,
+    metalness: 0.3,
   });
 
-  const tubeRadius = 0.082 * scale;
+  const tubeRadius = 0.115;
 
   // 1. Waypoints in 3D
   const waypoints = arrowData.points.map(
@@ -63,18 +58,18 @@ export function buildColorfulSnakeArrow(arrowData, scale = 1.0, center = { x: 0,
   else if (arrowData.dir === 'RIGHT') exitDir.set(1, 0, 0);
   else if (arrowData.dir === 'LEFT') exitDir.set(-1, 0, 0);
 
-  // Extend path forward along exit direction for the escape slither
+  // Extended path for exiting
   const tipPos = waypoints[waypoints.length - 1];
-  const extendedTip = tipPos.clone().add(exitDir.clone().multiplyScalar(12.0));
-  const fullPathPoints = [...waypoints, extendedTip];
+  const extendedTip = tipPos.clone().add(exitDir.clone().multiplyScalar(15.0));
+  const fullPath = [...waypoints, extendedTip];
 
-  // 2. Pre-calculate segment lengths and cumulative distances
+  // 2. Pre-calculate segment lengths & cumulative distances
   const segLengths = [];
   const cumDistances = [0];
   let totalRestLength = 0;
 
-  for (let i = 0; i < fullPathPoints.length - 1; i++) {
-    const d = fullPathPoints[i].distanceTo(fullPathPoints[i + 1]);
+  for (let i = 0; i < fullPath.length - 1; i++) {
+    const d = fullPath[i].distanceTo(fullPath[i + 1]);
     segLengths.push(d);
     cumDistances.push(cumDistances[i] + d);
     if (i < waypoints.length - 1) {
@@ -82,112 +77,123 @@ export function buildColorfulSnakeArrow(arrowData, scale = 1.0, center = { x: 0,
     }
   }
 
-  // Helper to interpolate 3D position and tangent along the polyline at any distance
-  function getPointOnPath(dist) {
-    const maxDist = cumDistances[cumDistances.length - 1];
-    const clampedDist = Math.max(0, Math.min(dist, maxDist));
+  const maxDist = cumDistances[cumDistances.length - 1];
 
-    let segIdx = 0;
+  function getPointAndTangent(d) {
+    const clamped = Math.max(0, Math.min(d, maxDist));
+    let idx = 0;
     for (let i = 0; i < cumDistances.length - 1; i++) {
-      if (clampedDist >= cumDistances[i] && clampedDist <= cumDistances[i + 1]) {
-        segIdx = i;
+      if (clamped >= cumDistances[i] && clamped <= cumDistances[i + 1]) {
+        idx = i;
         break;
       }
     }
-
-    const segLen = segLengths[segIdx];
-    const alpha = segLen > 0.0001 ? (clampedDist - cumDistances[segIdx]) / segLen : 0;
-    const p1 = fullPathPoints[segIdx];
-    const p2 = fullPathPoints[segIdx + 1];
-
-    const pos = new THREE.Vector3().lerpVectors(p1, p2, alpha);
-    const tangent = new THREE.Vector3().subVectors(p2, p1).normalize();
-    return { pos, tangent };
+    const len = segLengths[idx];
+    const alpha = len > 0.0001 ? (clamped - cumDistances[idx]) / len : 0;
+    const pos = new THREE.Vector3().lerpVectors(fullPath[idx], fullPath[idx + 1], alpha);
+    const tangent = new THREE.Vector3().subVectors(fullPath[idx + 1], fullPath[idx]).normalize();
+    return { pos, tangent, segIdx: idx };
   }
 
-  // 3. Generate initial curve and TubeGeometry at resting state
-  function samplePathPoints(sStart, sEnd, count = 24) {
-    const pts = [];
-    const len = sEnd - sStart;
-    for (let j = 0; j < count; j++) {
-      const d = sStart + (j / (count - 1)) * len;
-      pts.push(getPointOnPath(d).pos);
-    }
-    return pts;
-  }
+  // 3. Dynamic container for segments
+  const bodyContainer = new THREE.Group();
+  group.add(bodyContainer);
 
-  const initialSamples = samplePathPoints(0, totalRestLength, 24);
-  const initialCurve = new THREE.CatmullRomCurve3(initialSamples, false, 'catmullrom', 0.05);
-  let tubeGeom = new THREE.TubeGeometry(initialCurve, 28, tubeRadius, 8, false);
-
-  const tubeMesh = new THREE.Mesh(tubeGeom, material);
-  tubeMesh.castShadow = true;
-  group.add(tubeMesh);
-
-  // Tail rounded sphere cap
-  const tailGeom = new THREE.SphereGeometry(tubeRadius, 10, 10);
-  const tailMesh = new THREE.Mesh(tailGeom, material);
-  tailMesh.position.copy(initialSamples[0]);
-  group.add(tailMesh);
-
-  // Arrowhead at leading tip
   const headMesh = new THREE.Mesh(cachedHeadGeom, material);
-  headMesh.scale.setScalar(scale);
-  const initialHeadPt = getPointOnPath(totalRestLength);
-  headMesh.position.copy(initialHeadPt.pos);
-
-  // Initial head rotation matching exit direction
-  const initialAngle = Math.atan2(initialHeadPt.tangent.y, initialHeadPt.tangent.x) - Math.PI / 2;
-  headMesh.rotation.z = initialAngle;
   headMesh.castShadow = true;
   group.add(headMesh);
 
-  // 4. Snake Slithering Out ("saper moto jabe")
-  // The snake follows its own exact body path, slithering forward around every bend!
+  // Rebuilds sub-polyline between dTail and dHead
+  function renderSubPolyline(dTail, dHead) {
+    // Clear previous segment meshes
+    while (bodyContainer.children.length > 0) {
+      const child = bodyContainer.children[0];
+      bodyContainer.remove(child);
+      if (child.geometry) child.geometry.dispose();
+    }
+
+    if (dHead <= dTail || dTail >= totalRestLength + 12.0) {
+      headMesh.visible = false;
+      return;
+    }
+
+    headMesh.visible = true;
+
+    // Collect all vertices on the polyline between dTail and dHead
+    const startInfo = getPointAndTangent(dTail);
+    const endInfo = getPointAndTangent(dHead);
+
+    const subPts = [startInfo.pos];
+
+    // Add intermediate fullPath corners between startInfo.segIdx and endInfo.segIdx
+    for (let k = startInfo.segIdx + 1; k <= endInfo.segIdx; k++) {
+      subPts.push(fullPath[k].clone());
+    }
+
+    subPts.push(endInfo.pos);
+
+    // Build straight cylinder tubes between consecutive points
+    for (let i = 0; i < subPts.length - 1; i++) {
+      const p1 = subPts[i];
+      const p2 = subPts[i + 1];
+      const dist = p1.distanceTo(p2);
+      if (dist < 0.015) continue;
+
+      const cylGeom = new THREE.CylinderGeometry(tubeRadius, tubeRadius, dist, 14);
+      const cylMesh = new THREE.Mesh(cylGeom, material);
+      cylMesh.position.set((p1.x + p2.x) / 2, (p1.y + p2.y) / 2, zPos);
+
+      const angle = Math.atan2(p2.y - p1.y, p2.x - p1.x) - Math.PI / 2;
+      cylMesh.rotation.z = angle;
+      cylMesh.castShadow = true;
+      bodyContainer.add(cylMesh);
+    }
+
+    // Build corner spheres at interior joints
+    for (let i = 1; i < subPts.length - 1; i++) {
+      const jointGeom = new THREE.SphereGeometry(tubeRadius, 12, 12);
+      const jointMesh = new THREE.Mesh(jointGeom, material);
+      jointMesh.position.copy(subPts[i]);
+      bodyContainer.add(jointMesh);
+    }
+
+    // Tail sphere cap
+    const tailGeom = new THREE.SphereGeometry(tubeRadius, 12, 12);
+    const tailMesh = new THREE.Mesh(tailGeom, material);
+    tailMesh.position.copy(subPts[0]);
+    bodyContainer.add(tailMesh);
+
+    // Position and rotate Arrowhead at end
+    headMesh.position.copy(endInfo.pos);
+    const headAngle = Math.atan2(endInfo.tangent.y, endInfo.tangent.x) - Math.PI / 2;
+    headMesh.rotation.z = headAngle;
+  }
+
+  // Initial render at rest
+  renderSubPolyline(0, totalRestLength);
+
+  // 4. True Snake Slither Escape ("saper moto jabe")
   function slitherOut(parentGroup, onComplete) {
     group.userData.isEscaped = true;
 
-    const exitDistance = 7.5;
+    const exitDistance = 8.5;
     const animObj = { progress: 0 };
 
     gsap.to(animObj, {
       progress: 1,
-      duration: 0.95,
+      duration: 1.05,
       ease: 'power2.in',
       onUpdate: () => {
         const p = animObj.progress;
-        const headDist = totalRestLength + p * exitDistance;
-        // Tail catches up smoothly, slithering along every single bend of the path
-        const tailDist = p * (totalRestLength + exitDistance);
-        const currentLength = headDist - tailDist;
+        // Head advances forward into exit corridor
+        const curHead = totalRestLength + p * exitDistance;
+        // Tail catches up around every corner
+        const curTail = p * (totalRestLength + exitDistance);
 
-        if (currentLength < 0.08 || tailDist >= totalRestLength + exitDistance) {
-          tubeMesh.visible = false;
-          headMesh.visible = false;
-          tailMesh.visible = false;
-          return;
-        }
-
-        // Resample along current visible body interval [tailDist, headDist]
-        const currentSamples = samplePathPoints(tailDist, headDist, 24);
-        const newCurve = new THREE.CatmullRomCurve3(currentSamples, false, 'catmullrom', 0.05);
-
-        tubeMesh.geometry.dispose();
-        tubeMesh.geometry = new THREE.TubeGeometry(newCurve, 24, tubeRadius, 8, false);
-
-        // Advance Arrowhead at leading tip
-        const currentHead = getPointOnPath(headDist);
-        headMesh.position.copy(currentHead.pos);
-        const currentAngle = Math.atan2(currentHead.tangent.y, currentHead.tangent.x) - Math.PI / 2;
-        headMesh.rotation.z = currentAngle;
-
-        // Advance Tail cap along the exact path
-        const currentTail = getPointOnPath(tailDist);
-        tailMesh.position.copy(currentTail.pos);
+        renderSubPolyline(curTail, curHead);
       },
       onComplete: () => {
         parentGroup.remove(group);
-        if (tubeMesh.geometry) tubeMesh.geometry.dispose();
         if (onComplete) onComplete();
       },
     });
@@ -195,7 +201,7 @@ export function buildColorfulSnakeArrow(arrowData, scale = 1.0, center = { x: 0,
 
   // Wiggle error reaction when tapped while blocked
   function wiggleBlocked() {
-    const nudge = exitDir.clone().multiplyScalar(0.14);
+    const nudge = exitDir.clone().multiplyScalar(0.18);
     gsap
       .timeline()
       .to(group.position, {
@@ -222,17 +228,17 @@ export function buildColorfulSnakeArrow(arrowData, scale = 1.0, center = { x: 0,
     blockedBy: [...arrowData.blockedBy],
     isEscaped: false,
     material,
-    segments: [tubeMesh, headMesh, tailMesh],
     slitherOut,
     wiggleBlocked,
     tipPoint: { x: tipPos.x, y: tipPos.y },
+    segments: [headMesh, bodyContainer],
   };
 
   return group;
 }
 
 // Spawns the entire colorful snake maze
-export function spawnColorfulSnakeMaze(parentGroup, scale = 1.05, center = { x: 0, y: 0 }, zPos = 0.04) {
+export function spawnColorfulSnakeMaze(parentGroup, scale = 1.6, center = { x: 0, y: 0 }, zPos = 0.04) {
   const arrowGroups = [];
 
   COLORFUL_MAZE_ARROWS.forEach((arrowData) => {

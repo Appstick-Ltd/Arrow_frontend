@@ -1,7 +1,40 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Canvas3D from './components/Canvas3D';
 import Typewriter from './components/Typewriter';
+import DownloadModal from './components/DownloadModal';
+import InfoModal from './components/InfoModal';
 import './App.css';
+
+export const TAB_ROUTES = {
+  about: {
+    path: '/about-us',
+    title: 'ARROWS — About Appstick Ltd.',
+    aliases: ['/about-us', '/about', '#about-us', '#about']
+  },
+  privacy: {
+    path: '/privacy-policy',
+    title: 'ARROWS — Privacy Policy | Appstick',
+    aliases: ['/privacy-policy', '/privacy', '#privacy-policy', '#privacy']
+  },
+  terms: {
+    path: '/terms-conditions',
+    title: 'ARROWS — Terms & Conditions | Appstick',
+    aliases: ['/terms-conditions', '/terms', '#terms-conditions', '#terms']
+  }
+};
+
+export const getTabFromLocation = () => {
+  if (typeof window === 'undefined') return null;
+  const path = window.location.pathname.toLowerCase().replace(/\/$/, '') || '/';
+  const hash = window.location.hash.toLowerCase();
+
+  for (const [tabKey, config] of Object.entries(TAB_ROUTES)) {
+    if (config.aliases.includes(path) || config.aliases.includes(hash)) {
+      return tabKey;
+    }
+  }
+  return null;
+};
 
 export default function App() {
   const [soundEnabled, setSoundEnabled] = useState(false);
@@ -10,9 +43,36 @@ export default function App() {
   const [statusLabel, setStatusLabel] = useState('ENTRY');
   const [scrollProgress, setScrollProgress] = useState(0);
   const [sceneIndex, setSceneIndex] = useState('01');
+  const [downloadOpen, setDownloadOpen] = useState(false);
+  const [infoOpen, setInfoOpen] = useState(false);
+  const [infoTab, setInfoTab] = useState('about');
 
   const audioCtxRef = useRef(null);
   const cursorRef = useRef(null);
+
+  // Synchronize modal state with URL on initial load, refresh, and popstate
+  useEffect(() => {
+    const handleUrlChange = () => {
+      const tab = getTabFromLocation();
+      if (tab) {
+        setInfoTab(tab);
+        setInfoOpen(true);
+        document.title = TAB_ROUTES[tab].title;
+      } else {
+        setInfoOpen(false);
+        document.title = 'ARROWS — Puzzle Escape';
+      }
+    };
+
+    handleUrlChange();
+    window.addEventListener('popstate', handleUrlChange);
+    window.addEventListener('hashchange', handleUrlChange);
+
+    return () => {
+      window.removeEventListener('popstate', handleUrlChange);
+      window.removeEventListener('hashchange', handleUrlChange);
+    };
+  }, []);
 
   // Play minimal procedural Web Audio tone
   const playTone = (freq, duration = 0.15, vol = 0.035) => {
@@ -56,28 +116,29 @@ export default function App() {
 
   // Track cursor
   useEffect(() => {
+    // Track cursor position and interaction state across entire DOM (including modals)
     const onPointerMove = (e) => {
       if (cursorRef.current) {
         cursorRef.current.style.left = `${e.clientX}px`;
         cursorRef.current.style.top = `${e.clientY}px`;
+        cursorRef.current.style.opacity = '1';
       }
     };
     window.addEventListener('pointermove', onPointerMove);
 
-    const onMouseEnterInteractive = () => {
-      if (cursorRef.current) cursorRef.current.classList.add('active');
+    const onPointerOver = (e) => {
+      const isInteractive = e.target && e.target.closest && e.target.closest(
+        'button, a, input, select, textarea, .info-tab-btn, .contact-card, .store-card, .product-chip, .legal-card, .stat-card, [role="button"]'
+      );
+      if (cursorRef.current) {
+        if (isInteractive) {
+          cursorRef.current.classList.add('active');
+        } else {
+          cursorRef.current.classList.remove('active');
+        }
+      }
     };
-    const onMouseLeaveInteractive = () => {
-      if (cursorRef.current) cursorRef.current.classList.remove('active');
-    };
-
-    const attachCursorHover = () => {
-      document.querySelectorAll('button, a').forEach((el) => {
-        el.addEventListener('mouseenter', onMouseEnterInteractive);
-        el.addEventListener('mouseleave', onMouseLeaveInteractive);
-      });
-    };
-    attachCursorHover();
+    window.addEventListener('pointerover', onPointerOver);
 
     // Scroll updates for HUD & Scroll Meter
     const onScroll = () => {
@@ -103,11 +164,8 @@ export default function App() {
 
     return () => {
       window.removeEventListener('pointermove', onPointerMove);
+      window.removeEventListener('pointerover', onPointerOver);
       window.removeEventListener('scroll', onScroll);
-      document.querySelectorAll('button, a').forEach((el) => {
-        el.removeEventListener('mouseenter', onMouseEnterInteractive);
-        el.removeEventListener('mouseleave', onMouseLeaveInteractive);
-      });
     };
   }, []);
 
@@ -118,9 +176,7 @@ export default function App() {
 
   const handlePlayClick = () => {
     playTone(410, 0.16, 0.04);
-    setStatusLabel('ACTIVE PUZZLE');
-    const heroEl = document.getElementById('game');
-    if (heroEl) heroEl.scrollIntoView({ behavior: 'smooth' });
+    setDownloadOpen(true);
   };
 
   const handleTrailerClick = () => {
@@ -129,21 +185,56 @@ export default function App() {
   };
 
   const handleFinalPlayClick = () => {
-    const heroEl = document.getElementById('game');
-    if (heroEl) {
-      heroEl.scrollIntoView({ behavior: 'smooth' });
-      setTimeout(handlePlayClick, 700);
+    playTone(410, 0.16, 0.04);
+    setDownloadOpen(true);
+  };
+
+  const openInfo = (tab = 'about', updateHistory = true) => {
+    playTone(540, 0.12, 0.035);
+    setInfoTab(tab);
+    setInfoOpen(true);
+    const route = TAB_ROUTES[tab];
+    if (route) {
+      document.title = route.title;
+      if (updateHistory && window.location.pathname !== route.path) {
+        window.history.pushState({ modal: tab }, '', route.path);
+      }
+    }
+  };
+
+  const closeInfo = (updateHistory = true) => {
+    setInfoOpen(false);
+    document.title = 'ARROWS — Puzzle Escape';
+    if (updateHistory && getTabFromLocation()) {
+      window.history.pushState(null, '', '/');
     }
   };
 
   return (
     <div className="app-root">
+      {/* Download Modal Dialog */}
+      <DownloadModal
+        isOpen={downloadOpen}
+        onClose={() => setDownloadOpen(false)}
+        onTone={playTone}
+      />
+
+      {/* Info & Legal Modal Dialog (About Us, Privacy Policy, Terms) */}
+      <InfoModal
+        isOpen={infoOpen}
+        initialTab={infoTab}
+        onTabChange={(tab) => openInfo(tab, true)}
+        onClose={() => closeInfo(true)}
+        onTone={playTone}
+      />
+
       {/* 3D WebGL Canvas */}
       <Canvas3D
         onTileChange={handleTileChange}
         soundEnabled={soundEnabled}
         onTone={playTone}
       />
+
 
       {/* Atmospheric Overlays */}
       <div className="grain" />
@@ -154,6 +245,17 @@ export default function App() {
         <div className="rail">
           <div className="system-id">
             <i /> INTERACTIVE PUZZLE / 01
+          </div>
+          <div className="rail-nav-links">
+            <button className="rail-link-btn" onClick={() => openInfo('about')}>
+              About Us
+            </button>
+            <button className="rail-link-btn" onClick={() => openInfo('privacy')}>
+              Privacy Policy
+            </button>
+            <button className="rail-link-btn" onClick={() => openInfo('terms')}>
+              Terms & Conditions
+            </button>
           </div>
           <button
             className="sound"
@@ -170,7 +272,7 @@ export default function App() {
           <b id="scrollFill" style={{ height: `${scrollProgress * 100}%` }} />
         </div>
 
-        <div className="status">
+        <div className={`status ${scrollProgress > 0.85 ? 'status-hidden' : ''}`}>
           <i />
           <span id="statusLabel">{statusLabel}</span> //{' '}
           <b id="statusCount">
@@ -273,7 +375,26 @@ export default function App() {
             </button>
           </div>
         </section>
+
+        {/* Footer Legal Bar */}
+        <footer className="footer-legal-bar">
+          <div className="footer-copy-text">
+            © {new Date().getFullYear()} <strong>Appstick Ltd.</strong> • All rights reserved. Crafting next-gen interactive digital experiences.
+          </div>
+          <div className="footer-legal-buttons">
+            <button className="footer-legal-btn" onClick={() => openInfo('about')}>
+              About Appstick
+            </button>
+            <button className="footer-legal-btn" onClick={() => openInfo('privacy')}>
+              Privacy Policy
+            </button>
+            <button className="footer-legal-btn" onClick={() => openInfo('terms')}>
+              Terms & Conditions
+            </button>
+          </div>
+        </footer>
       </main>
     </div>
   );
 }
+
