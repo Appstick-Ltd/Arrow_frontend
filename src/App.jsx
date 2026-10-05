@@ -6,7 +6,7 @@ import './App.css';
 export default function App() {
   const [soundEnabled, setSoundEnabled] = useState(false);
   const [alignedCount, setAlignedCount] = useState(0);
-  const [totalCount, setTotalCount] = useState(26);
+  const [totalCount, setTotalCount] = useState(9);
   const [statusLabel, setStatusLabel] = useState('ENTRY');
   const [scrollProgress, setScrollProgress] = useState(0);
   const [sceneIndex, setSceneIndex] = useState('01');
@@ -174,7 +174,7 @@ export default function App() {
           <i />
           <span id="statusLabel">{statusLabel}</span> //{' '}
           <b id="statusCount">
-            {alignedCount} / {totalCount} ESCAPED
+            {alignedCount} / {totalCount} ALIGNED
           </b>
         </div>
       </div>
@@ -185,8 +185,8 @@ export default function App() {
       {/* Solved Overlay State */}
       <div className="solved" aria-live="polite">
         <div>
-          <strong>MAZE ESCAPED</strong>
-          <small>ALL PATHS CLEARED</small>
+          <strong>PUZZLE SOLVED</strong>
+          <small>PATH CLEARED</small>
         </div>
       </div>
 
@@ -200,20 +200,10 @@ export default function App() {
               ARROWS <span>Puzzle Escape</span>
             </h1>
             <p className="tagline">
-              <Typewriter
-                phrases={[
-                  'Think. Move. Escape.',
-                  'Untangle the labyrinth.',
-                  'One move clears the route.',
-                  'Master the escape protocol.',
-                ]}
-                speed={65}
-                deleteSpeed={35}
-                pauseDuration={2400}
-              />
+              <Typewriter />
             </p>
             <p className="lede">
-              A minimalist puzzle where untangling each winding arrow clears your escape.
+              A minimalist puzzle where every move changes your path.
             </p>
             <div className="actions">
               <button className="btn" id="playBtn" onClick={handlePlayClick}>
@@ -225,8 +215,9 @@ export default function App() {
             </div>
           </div>
           <div className="orbit-guide">
-            <span>ESCAPE LABYRINTH / UNTANGLE PROTOCOL</span>
+            <span>3D MOBILE DISPLAY / UNTANGLE</span>
           </div>
+
           <div className="scroll-cue">
             DESCEND <i />
           </div>

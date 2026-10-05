@@ -1,56 +1,50 @@
 import React, { useState, useEffect } from 'react';
 
-export default function Typewriter({
-  phrases = [
-    'THINK. MOVE. ESCAPE.',
-    'UNTANGLE THE LABYRINTH.',
-    'ONE MOVE CLEARS THE WAY.',
-    'MASTER THE ESCAPE PROTOCOL.',
-  ],
-  speed = 65,
-  deleteSpeed = 35,
-  pauseDuration = 2000,
-}) {
+const PHRASES = [
+  'Think. Move. Escape.',
+  'Untangle the labyrinth.',
+  'One move clears the route.',
+  'Master the escape protocol.',
+  'Slither free to victory.',
+];
+
+export default function Typewriter({ phrases = PHRASES, typeSpeed = 70, deleteSpeed = 35, pauseMs = 1800 }) {
   const [phraseIndex, setPhraseIndex] = useState(0);
-  const [text, setText] = useState('');
+  const [displayText, setDisplayText] = useState('');
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
     const currentPhrase = phrases[phraseIndex % phrases.length];
-    let timeoutId;
 
+    let timer;
     if (!isDeleting) {
-      if (text.length < currentPhrase.length) {
-        // Typing forward
-        timeoutId = setTimeout(() => {
-          setText(currentPhrase.slice(0, text.length + 1));
-        }, speed);
+      if (displayText.length < currentPhrase.length) {
+        timer = setTimeout(() => {
+          setDisplayText(currentPhrase.slice(0, displayText.length + 1));
+        }, typeSpeed);
       } else {
-        // Pause when full phrase typed
-        timeoutId = setTimeout(() => {
+        timer = setTimeout(() => {
           setIsDeleting(true);
-        }, pauseDuration);
+        }, pauseMs);
       }
     } else {
-      if (text.length > 0) {
-        // Deleting backward
-        timeoutId = setTimeout(() => {
-          setText(currentPhrase.slice(0, text.length - 1));
+      if (displayText.length > 0) {
+        timer = setTimeout(() => {
+          setDisplayText(currentPhrase.slice(0, displayText.length - 1));
         }, deleteSpeed);
       } else {
-        // Switch to next phrase
         setIsDeleting(false);
-        setPhraseIndex((prev) => (prev + 1) % phrases.length);
+        setPhraseIndex((prev) => prev + 1);
       }
     }
 
-    return () => clearTimeout(timeoutId);
-  }, [text, isDeleting, phraseIndex, phrases, speed, deleteSpeed, pauseDuration]);
+    return () => clearTimeout(timer);
+  }, [displayText, isDeleting, phraseIndex, phrases, typeSpeed, deleteSpeed, pauseMs]);
 
   return (
     <span className="typewriter-container">
-      <span className="typewriter-text">{text}</span>
-      <span className="typewriter-caret" aria-hidden="true" />
+      <span className="typewriter-text">{displayText}</span>
+      <span className="typewriter-cursor" aria-hidden="true">|</span>
     </span>
   );
 }
